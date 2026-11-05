@@ -1,0 +1,18 @@
+{
+  "name": "webgis-cayxanh-govap",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^8.3.5"
+  },
+  "dependencies": {
+    "@arcgis/core": "^5.1.27",
+    "chart.js": "^4.6.1"
+  }
+}
