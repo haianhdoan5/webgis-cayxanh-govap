@@ -4,41 +4,103 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WebGIS Quản Lý Cây Xanh Đô Thị - Quận Gò Vấp</title>
-    <!-- Nhúng CSS chuẩn của ArcGIS Maps SDK for JavaScript -->
-    <link rel="stylesheet" href="https://js.arcgis.com/4.30/@arcgis/core/assets/esri/themes/light/main.css" />
+    <!-- CSS chính thức của ArcGIS Maps SDK for JavaScript 4.x -->
+    <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css" />
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
     <div id="app-container">
-      <!-- Thanh Header -->
+      <!-- Header -->
       <header class="app-header">
         <div class="brand">
-          <span class="tree-icon">🌳</span>
+          <span class="logo-icon">🌳</span>
           <h1>WebGIS Quản Lý Cây Xanh Quận Gò Vấp</h1>
         </div>
         <div class="header-actions">
-          <span class="role-badge">Chế độ: Tra cứu & Quản lý</span>
+          <button id="btnToggleTable" class="btn-header" title="Ẩn/Hiện bảng thuộc tính">
+            📋 Bảng thuộc tính
+          </button>
+          <span class="role-badge">Chế độ: Tra cứu &amp; Quản lý</span>
         </div>
       </header>
 
-      <!-- Khung nội dung chính -->
+      <!-- Main Layout -->
       <div class="main-content">
-        <!-- Sidebar bên trái (Khung điều khiển & Danh sách lớp) -->
+        <!-- Sidebar điều khiển bên trái -->
         <aside class="sidebar">
+          <!-- Khối 1: Tìm kiếm & Bộ lọc đa tiêu chí (Tuần 6) -->
           <div class="panel-section">
-            <h3>Danh sách lớp dữ liệu</h3>
+            <h3>🔍 Tra cứu &amp; Lọc cây xanh</h3>
+            
+            <div class="form-group">
+              <label for="searchInput">Tìm nhanh (Mã cây / Tên đường / Loài):</label>
+              <div class="search-row">
+                <input type="text" id="searchInput" placeholder="VD: CX001, Quang Trung..." />
+                <button id="btnSearch" class="btn-primary">Tìm</button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="filterPhuong">Phường:</label>
+              <select id="filterPhuong">
+                <option value="">-- Tất cả Phường --</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="filterTuyenDuong">Tuyến đường:</label>
+              <select id="filterTuyenDuong">
+                <option value="">-- Tất cả Tuyến đường --</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="filterLoaiCay">Loài cây:</label>
+              <select id="filterLoaiCay">
+                <option value="">-- Tất cả Loài cây --</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="filterTinhTrang">Tình trạng sinh trưởng:</label>
+              <select id="filterTinhTrang">
+                <option value="">-- Tất cả Tình trạng --</option>
+              </select>
+            </div>
+
+            <div class="filter-actions">
+              <button id="btnApplyFilter" class="btn-primary">Áp dụng lọc</button>
+              <button id="btnResetFilter" class="btn-secondary">Đặt lại</button>
+            </div>
+
+            <div id="filterCountBadge" class="count-badge">
+              Tổng số cây hiển thị: <strong id="treeCountVal">Đang tải...</strong>
+            </div>
+          </div>
+
+          <!-- Khối 2: Bật/tắt lớp bản đồ -->
+          <div class="panel-section">
+            <h3>Danh sách lớp bản đồ</h3>
             <div id="layerListDiv"></div>
           </div>
+
+          <!-- Khối 3: Chú giải -->
           <div class="panel-section">
-            <h3>Chú giải bản đồ (Legend)</h3>
+            <h3>Chú giải bản đồ</h3>
             <div id="legendDiv"></div>
           </div>
         </aside>
 
-        <!-- Khung hiển thị Bản đồ -->
-        <main id="viewDiv"></main>
+        <!-- Khu vực phải: Bản đồ ở trên + Bảng thuộc tính (FeatureTable) ở dưới -->
+        <main class="workspace">
+          <div id="viewDiv"></div>
+          <div id="tablePanel" class="table-panel">
+            <div id="tableDiv"></div>
+          </div>
+        </main>
       </div>
     </div>
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
