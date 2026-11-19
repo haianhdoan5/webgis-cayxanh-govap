@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WebGIS Quản Lý Cây Xanh Đô Thị - Quận Gò Vấp</title>
-    <!-- CSS chính thức của ArcGIS Maps SDK for JavaScript 4.x -->
-    <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css" />
+    <!-- CSS từ gói @arcgis/core cục bộ -->
+    <link rel="stylesheet" href="/node_modules/@arcgis/core/assets/esri/themes/light/main.css" />
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
@@ -20,7 +20,12 @@
           <button id="btnToggleTable" class="btn-header" title="Ẩn/Hiện bảng thuộc tính">
             📋 Bảng thuộc tính
           </button>
-          <span class="role-badge">Chế độ: Tra cứu &amp; Quản lý</span>
+          <span id="roleBadge" class="role-badge public-mode">
+            👥 Chế độ: Người dân (Chỉ xem)
+          </span>
+          <button id="btnAuthAction" class="btn-auth">
+            🔐 Đăng nhập Cán bộ
+          </button>
         </div>
       </header>
 
@@ -28,10 +33,59 @@
       <div class="main-content">
         <!-- Sidebar điều khiển bên trái -->
         <aside class="sidebar">
+          <!-- KHỐI QUẢN TRỊ DÀNH RIÊNG CHO CÁN BỘ (Ẩn mặc định khi chưa đăng nhập) -->
+          <div id="adminPanel" class="panel-section admin-section hidden">
+            <h3>🛠️ Phân hệ Cán bộ Quản lý (Tuần 7)</h3>
+            <p class="admin-hint">
+              Sử dụng bảng <strong>Editor</strong> dưới đây để Thêm mới, Sửa vị trí/thuộc tính, Xóa cây hoặc Tải ảnh hiện trường:
+            </p>
+            <!-- Nơi nhúng Editor Widget của ArcGIS -->
+            <div id="editorDiv"></div>
+
+            <!-- Form thêm mới bản ghi vào bảng quan hệ LichSuChamSoc -->
+            <div class="care-log-box">
+              <h4>📝 Ghi nhật ký Chăm sóc (Bảng 1-N)</h4>
+              <p id="selectedTreeInfo" class="selected-tree-banner">
+                👉 Nhấp chọn 1 cây xanh trên bản đồ để ghi nhật ký
+              </p>
+
+              <div class="form-group">
+                <label for="careDate">Ngày thực hiện:</label>
+                <input type="date" id="careDate" />
+              </div>
+
+              <div class="form-group">
+                <label for="careWork">Nội dung công việc duy tu:</label>
+                <select id="careWork">
+                  <option value="Cắt tỉa nhánh định kỳ">Cắt tỉa nhánh định kỳ</option>
+                  <option value="Bón phân & Tưới nước">Bón phân &amp; Tưới nước</option>
+                  <option value="Phun thuốc xử lý sâu bệnh">Phun thuốc xử lý sâu bệnh</option>
+                  <option value="Chằng chống trước mùa mưa bão">Chằng chống trước mùa mưa bão</option>
+                  <option value="Kiểm tra an toàn thân/rễ">Kiểm tra an toàn thân/rễ</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="careUnit">Đơn vị / Người thực hiện:</label>
+                <input type="text" id="careUnit" placeholder="VD: Đội Duy tu Cây xanh Gò Vấp" value="Đội Duy tu Cây xanh Gò Vấp" />
+              </div>
+
+              <div class="form-group">
+                <label for="careNote">Ghi chú chi tiết:</label>
+                <input type="text" id="careNote" placeholder="VD: Đã tỉa tán gọn, cây phát triển tốt..." />
+              </div>
+
+              <button id="btnAddCareLog" class="btn-primary" disabled>
+                ➕ Lưu lịch sử chăm sóc
+              </button>
+              <div id="careStatusMsg" class="status-msg"></div>
+            </div>
+          </div>
+
           <!-- Khối 1: Tìm kiếm & Bộ lọc đa tiêu chí (Tuần 6) -->
           <div class="panel-section">
             <h3>🔍 Tra cứu &amp; Lọc cây xanh</h3>
-            
+
             <div class="form-group">
               <label for="searchInput">Tìm nhanh (Mã cây / Tên đường / Loài):</label>
               <div class="search-row">
@@ -98,6 +152,34 @@
             <div id="tableDiv"></div>
           </div>
         </main>
+      </div>
+    </div>
+
+    <!-- MODAL ĐĂNG NHẬP PORTAL ARCGIS (Tuần 7) -->
+    <div id="loginModal" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>🔐 Đăng nhập Hệ thống Quản trị Cây xanh</h3>
+          <button id="btnCloseModal" class="btn-close">✕</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc">
+            Xác thực bằng tài khoản <strong>Portal for ArcGIS (hcmgis.esrivn.net)</strong> để mở khóa chức năng Biên tập cây xanh &amp; Ghi nhật ký chăm sóc:
+          </p>
+          <div class="form-group">
+            <label for="portalUsername">Tên đăng nhập (Username):</label>
+            <input type="text" id="portalUsername" placeholder="Nhập username Portal..." />
+          </div>
+          <div class="form-group">
+            <label for="portalPassword">Mật khẩu (Password):</label>
+            <input type="password" id="portalPassword" placeholder="Nhập mật khẩu..." />
+          </div>
+          <div id="loginErrorMsg" class="error-msg"></div>
+        </div>
+        <div class="modal-footer">
+          <button id="btnCancelLogin" class="btn-secondary">Hủy</button>
+          <button id="btnSubmitLogin" class="btn-primary">Đăng nhập &amp; Cấp Token</button>
+        </div>
       </div>
     </div>
 
