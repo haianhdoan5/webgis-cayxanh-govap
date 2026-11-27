@@ -13,10 +13,22 @@
       <!-- Header -->
       <header class="app-header">
         <div class="brand">
+          <button id="btnToggleSidebar" class="btn-mobile-menu" title="Ẩn/Hiện bảng điều khiển">
+            ☰
+          </button>
           <span class="logo-icon">🌳</span>
           <h1>WebGIS Quản Lý Cây Xanh Quận Gò Vấp</h1>
         </div>
         <div class="header-actions">
+          <button id="btnOpenStats" class="btn-header btn-stats" title="Xem thống kê & biểu đồ cây xanh">
+            📊 Thống kê
+          </button>
+          <button id="btnExportCsv" class="btn-header" title="Xuất danh sách cây đang lọc ra CSV">
+            📥 Xuất CSV
+          </button>
+          <button id="btnPrintMap" class="btn-header" title="Xuất ảnh hoặc in bản đồ hiện tại">
+            🖨️ In bản đồ
+          </button>
           <button id="btnToggleTable" class="btn-header" title="Ẩn/Hiện bảng thuộc tính">
             📋 Bảng thuộc tính
           </button>
@@ -32,10 +44,10 @@
       <!-- Main Layout -->
       <div class="main-content">
         <!-- Sidebar điều khiển bên trái -->
-        <aside class="sidebar">
+        <aside id="sidebar" class="sidebar">
           <!-- KHỐI QUẢN TRỊ DÀNH RIÊNG CHO CÁN BỘ (Ẩn mặc định khi chưa đăng nhập) -->
           <div id="adminPanel" class="panel-section admin-section hidden">
-            <h3>🛠️ Phân hệ Cán bộ Quản lý (Tuần 7)</h3>
+            <h3>🛠️ Phân hệ Cán bộ Quản lý</h3>
             <p class="admin-hint">
               Sử dụng bảng <strong>Editor</strong> dưới đây để Thêm mới, Sửa vị trí/thuộc tính, Xóa cây hoặc Tải ảnh hiện trường:
             </p>
@@ -67,7 +79,12 @@
 
               <div class="form-group">
                 <label for="careUnit">Đơn vị / Người thực hiện:</label>
-                <input type="text" id="careUnit" placeholder="VD: Đội Duy tu Cây xanh Gò Vấp" value="Đội Duy tu Cây xanh Gò Vấp" />
+                <input
+                  type="text"
+                  id="careUnit"
+                  placeholder="VD: Đội Duy tu Cây xanh Gò Vấp"
+                  value="Đội Duy tu Cây xanh Gò Vấp"
+                />
               </div>
 
               <div class="form-group">
@@ -82,7 +99,7 @@
             </div>
           </div>
 
-          <!-- Khối 1: Tìm kiếm & Bộ lọc đa tiêu chí (Tuần 6) -->
+          <!-- Khối 1: Tìm kiếm & Bộ lọc đa tiêu chí + Cảnh báo mưa bão -->
           <div class="panel-section">
             <h3>🔍 Tra cứu &amp; Lọc cây xanh</h3>
 
@@ -127,18 +144,70 @@
               <button id="btnResetFilter" class="btn-secondary">Đặt lại</button>
             </div>
 
+            <!-- Lọc nhanh ứng phó mùa mưa bão (Tuần 8) -->
+            <button id="btnStormFilter" class="btn-warning-full" title="Lọc nhanh các cây Nguy hiểm và Cần cắt tỉa">
+              ⚠️ Cảnh báo mùa mưa bão (Nguy hiểm &amp; Cần cắt tỉa)
+            </button>
+
             <div id="filterCountBadge" class="count-badge">
               Tổng số cây hiển thị: <strong id="treeCountVal">Đang tải...</strong>
             </div>
           </div>
 
-          <!-- Khối 2: Bật/tắt lớp bản đồ -->
+          <!-- Khối 2: Truy vấn không gian (Tuần 8 - Ưu tiên 3) -->
+          <div class="panel-section">
+            <h3>📐 Truy vấn không gian (Mưa bão / Thi công)</h3>
+
+            <div class="form-group">
+              <label for="radiusInput">Bán kính quét quanh điểm (mét):</label>
+              <div class="search-row">
+                <input type="number" id="radiusInput" value="300" min="50" max="3000" step="50" />
+                <button id="btnSpatialRadius" class="btn-primary">📍 Chọn tâm</button>
+              </div>
+            </div>
+
+            <div class="filter-actions">
+              <button id="btnSpatialPolygon" class="btn-outline">⬠ Vẽ vùng đa giác</button>
+              <button id="btnFinishPolygon" class="btn-primary hidden">✓ Hoàn tất</button>
+              <button id="btnClearSpatial" class="btn-secondary">Xóa vùng</button>
+            </div>
+
+            <div id="spatialStatus" class="spatial-hint">
+              Chưa chọn vùng không gian. Chọn chế độ trên rồi nhấp vào bản đồ.
+            </div>
+          </div>
+
+          <!-- Khối 3: Chế độ hiển thị & Bản đồ nền (Tuần 8 - Ưu tiên 3) -->
+          <div class="panel-section">
+            <h3>🎨 Hiển thị &amp; Bản đồ nền</h3>
+
+            <div class="form-group">
+              <label>Chế độ hiển thị lớp Cây xanh:</label>
+              <div class="mode-grid">
+                <button class="mode-btn active" data-mode="standard">📍 Điểm chuẩn</button>
+                <button class="mode-btn" data-mode="canopy">🌳 Theo cỡ tán</button>
+                <button class="mode-btn" data-mode="cluster">🔵 Gom cụm</button>
+                <button class="mode-btn" data-mode="heatmap">🔥 Mật độ nhiệt</button>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0">
+              <label for="basemapSelect">Bản đồ nền (Basemap):</label>
+              <select id="basemapSelect">
+                <option value="osm">🗺️ Đường phố (OpenStreetMap)</option>
+                <option value="satellite">🛰️ Ảnh vệ tinh (Esri Imagery)</option>
+                <option value="light">⬜ Nền sáng tối giản (Carto Light)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Khối 4: Bật/tắt lớp bản đồ -->
           <div class="panel-section">
             <h3>Danh sách lớp bản đồ</h3>
             <div id="layerListDiv"></div>
           </div>
 
-          <!-- Khối 3: Chú giải -->
+          <!-- Khối 5: Chú giải -->
           <div class="panel-section">
             <h3>Chú giải bản đồ</h3>
             <div id="legendDiv"></div>
@@ -147,7 +216,13 @@
 
         <!-- Khu vực phải: Bản đồ ở trên + Bảng thuộc tính (FeatureTable) ở dưới -->
         <main class="workspace">
-          <div id="viewDiv"></div>
+          <div class="map-wrapper">
+            <div id="viewDiv"></div>
+            <!-- Nút định vị GPS hiện trường nổi trên bản đồ -->
+            <button id="btnLocateMe" class="map-float-btn" title="Định vị vị trí hiện tại (GPS)">
+              🎯
+            </button>
+          </div>
           <div id="tablePanel" class="table-panel">
             <div id="tableDiv"></div>
           </div>
@@ -179,6 +254,133 @@
         <div class="modal-footer">
           <button id="btnCancelLogin" class="btn-secondary">Hủy</button>
           <button id="btnSubmitLogin" class="btn-primary">Đăng nhập &amp; Cấp Token</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DASHBOARD THỐNG KÊ & BIỂU ĐỒ (Tuần 8 - Ưu tiên 1 & 2) -->
+    <div id="statsModal" class="modal-overlay hidden">
+      <div class="modal-card modal-xl">
+        <div class="modal-header">
+          <h3>📊 Dashboard Thống kê Cây xanh Đô thị Quận Gò Vấp</h3>
+          <button id="btnCloseStats" class="btn-close">✕</button>
+        </div>
+        <div class="modal-body stats-body">
+          <div class="stats-toolbar">
+            <span id="statsScopeLabel" class="stats-scope">
+              Phạm vi thống kê: Toàn bộ dữ liệu hiện tại
+            </span>
+            <div class="stats-toolbar-actions">
+              <button id="btnRefreshStats" class="btn-secondary">🔄 Làm mới</button>
+              <button id="btnStatsExportCsv" class="btn-primary">📥 Xuất báo cáo CSV</button>
+            </div>
+          </div>
+
+          <!-- 4 thẻ KPI tổng quan -->
+          <div class="kpi-grid">
+            <div class="kpi-card kpi-total">
+              <div class="kpi-label">Tổng số cây</div>
+              <div id="kpiTotal" class="kpi-value">--</div>
+              <div id="kpiAvgSize" class="kpi-sub">Cao TB: -- m | Tán TB: -- m</div>
+            </div>
+            <div class="kpi-card kpi-good">
+              <div class="kpi-label">Sinh trưởng Tốt</div>
+              <div id="kpiGood" class="kpi-value">--</div>
+              <div id="kpiGoodPct" class="kpi-sub">-- % tổng số cây</div>
+            </div>
+            <div class="kpi-card kpi-warn">
+              <div class="kpi-label">Cần cắt tỉa / Sâu bệnh</div>
+              <div id="kpiWarn" class="kpi-value">--</div>
+              <div id="kpiWarnPct" class="kpi-sub">Cần lên kế hoạch duy tu</div>
+            </div>
+            <div class="kpi-card kpi-danger">
+              <div class="kpi-label">Nguy hiểm (Ưu tiên gấp)</div>
+              <div id="kpiDanger" class="kpi-value">--</div>
+              <div id="kpiDangerPct" class="kpi-sub">Xử lý trước mùa mưa bão</div>
+            </div>
+          </div>
+
+          <!-- 3 biểu đồ Chart.js -->
+          <div class="charts-grid">
+            <div class="chart-card">
+              <h4>Tỷ lệ theo Tình trạng sinh trưởng</h4>
+              <div class="chart-canvas-wrap">
+                <canvas id="chartStatus"></canvas>
+              </div>
+            </div>
+            <div class="chart-card">
+              <h4>Số lượng cây theo Phường</h4>
+              <div class="chart-canvas-wrap">
+                <canvas id="chartWard"></canvas>
+              </div>
+            </div>
+            <div class="chart-card chart-card-wide">
+              <h4>Phân bố theo Loài cây đô thị</h4>
+              <div class="chart-canvas-wrap chart-tall">
+                <canvas id="chartSpecies"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Danh sách ưu tiên xử lý trước mùa mưa bão -->
+          <div class="storm-section">
+            <div class="storm-header">
+              <h4>⚠️ Danh sách cây ưu tiên xử lý trước mùa mưa bão (Top 30 cây cao nhất)</h4>
+              <button id="btnApplyStormFromStats" class="btn-warning-sm">
+                Lọc trên bản đồ
+              </button>
+            </div>
+            <div class="storm-table-wrap">
+              <table class="storm-table">
+                <thead>
+                  <tr>
+                    <th>Mã cây</th>
+                    <th>Loài cây</th>
+                    <th>Tuyến đường</th>
+                    <th>Phường</th>
+                    <th>Cao (m)</th>
+                    <th>Tình trạng</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="stormTableBody">
+                  <tr>
+                    <td colspan="7" style="text-align: center; color: #64748b">Đang tải dữ liệu...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL XEM TRƯỚC & IN BẢN ĐỒ (Tuần 8 - Ưu tiên 2) -->
+    <div id="printModal" class="modal-overlay hidden">
+      <div class="modal-card modal-lg">
+        <div class="modal-header">
+          <h3>🖨️ Xuất ảnh &amp; In bản đồ báo cáo</h3>
+          <button id="btnClosePrint" class="btn-close">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="printTitleInput">Tiêu đề bản đồ báo cáo:</label>
+            <div class="search-row">
+              <input
+                type="text"
+                id="printTitleInput"
+                value="BẢN ĐỒ HIỆN TRẠNG CÂY XANH ĐÔ THỊ - QUẬN GÒ VẤP"
+              />
+              <button id="btnRegeneratePrint" class="btn-secondary">Cập nhật ảnh</button>
+            </div>
+          </div>
+          <div id="printPreviewWrap" class="print-preview-wrap">
+            <p class="print-loading">Đang kết xuất ảnh bản đồ...</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="btnDownloadPng" class="btn-primary">⬇️ Tải ảnh PNG</button>
+          <button id="btnBrowserPrint" class="btn-secondary">🖨️ In bản đồ (A4)</button>
         </div>
       </div>
     </div>
